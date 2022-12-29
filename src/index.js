@@ -1,4 +1,5 @@
 import './css/styles.css';
+import { fetchCountries } from './fetchCountries';
 import Notiflix from 'notiflix';
 var debounce = require('lodash.debounce');
 
@@ -18,8 +19,8 @@ refs.inputBox.addEventListener(
 function countrySearch(e) {
   const inputValue = e.target.value.trim();
   if (!inputValue) {
-    refs.countryInfo.innerHTML = '';
-    refs.countryList.innerHTML = '';
+    resetCountryInfo();
+    resetCountryList();
     return;
   }
   fetchCountries(inputValue)
@@ -30,27 +31,15 @@ function countrySearch(e) {
         );
       } else if (country.length === 1) {
         createMarkupInfo(country);
-        refs.countryList.innerHTML = '';
+        resetCountryList();
       } else {
         createMarkupList(country);
-        refs.countryInfo.innerHTML = '';
+        resetCountryInfo();
       }
     })
     .catch(error => {
       console.log(error);
     });
-}
-
-function fetchCountries(name) {
-  const URL = `https://restcountries.com/v3.1/name/${name}`;
-  return fetch(
-    `${URL}?fields=name,capital,population,flags,languages,translation`
-  ).then(responce => {
-    if (!responce.ok) {
-      Notiflix.Notify.failure('Oops, there is no country with that name');
-    }
-    return responce.json();
-  });
 }
 
 function createMarkupInfo(countries) {
@@ -61,8 +50,8 @@ function createMarkupInfo(countries) {
     .join('');
   const markup = countries
     .map(({ name: { official }, capital, population, flags: { svg } }) => {
-      return `<ul style="list-style: none;"><li>
-      <img src="${svg}" alt="name" width="40" height="30"/> <span><b>${official}</b></span>
+      return `<ul style="list-style: none;"><li style="font-size: 30px;">
+      <img src="${svg}" alt="name" width="40" height="25"/> <span><b>${official}</b></span>
       </li>
       <li><b>Capital:</b> ${capital}</li>
       <li><b>Population:</b> ${population}</li>
@@ -76,11 +65,19 @@ function createMarkupInfo(countries) {
 function createMarkupList(countries) {
   const markup = countries
     .map(({ name: { official }, flags: { svg } }) => {
-      return `<li>
+      return `<li style="font-size: 20px;">
         <img src="${svg}" alt="name" width="40" height="25"/> <span><b>${official}</b></span>
       </li>`;
     })
     .join('');
 
   refs.countryList.innerHTML = markup;
+}
+
+function resetCountryInfo() {
+  refs.countryInfo.innerHTML = '';
+}
+
+function resetCountryList() {
+  refs.countryList.innerHTML = '';
 }
